@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Đăng ký - Dookki{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-7 col-lg-6"><div class="card border-0 shadow rounded-4"><div class="card-body p-4 p-md-5">
+    <h2 class="text-danger fw-bold text-center mb-4">Tạo tài khoản khách hàng</h2>
+    <form method="POST" action="{{ url_for('auth.register') }}">
+        <div class="mb-3"><label class="form-label">Họ và tên</label><input class="form-control" name="full_name" maxlength="100" value="{{ request.form.get('full_name', '') }}" required></div>
+        <div class="mb-3"><label class="form-label">Tên đăng nhập</label><input class="form-control" name="username" minlength="3" maxlength="50" autocomplete="username" value="{{ request.form.get('username', '') }}" required></div>
+        <div class="mb-3"><label class="form-label">Mật khẩu (ít nhất 6 ký tự)</label><input class="form-control" type="password" name="password" minlength="6" autocomplete="new-password" required></div>
+        <div class="mb-4"><label class="form-label">Nhập lại mật khẩu</label><input class="form-control" type="password" name="confirm_password" minlength="6" autocomplete="new-password" required></div>
+        <button class="btn btn-danger w-100 fw-bold" type="submit">Đăng ký</button>
+    </form>
+    <p class="text-center mt-3 mb-0">Đã có tài khoản? <a href="{{ url_for('auth.login') }}">Đăng nhập</a></p>
+</div></div></div></div>
+{% endblock %}

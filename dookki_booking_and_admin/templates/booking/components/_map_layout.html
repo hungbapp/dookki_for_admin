@@ -1,0 +1,168 @@
+<div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3 flex-wrap gap-2">
+    <h5 class="text-danger m-0 fw-bold"><i class="bi bi-map-fill me-2"></i>Sơ đồ nhà hàng</h5>
+    <div class="d-flex gap-2 bg-light p-2 rounded border flex-wrap align-items-center">
+        <div class="d-flex align-items-center">
+            <div style="width:16px; height:16px; border:2px dashed #ced4da; background:#fff; border-radius:4px;" class="me-1"></div>
+            <small class="fw-semibold text-secondary">Không khớp</small>
+        </div>
+        <div class="d-flex align-items-center">
+            <div style="width:16px; height:16px; background-color:#28a745; border-radius:4px;" class="me-1"></div>
+            <small class="fw-semibold text-success">Trống</small>
+        </div>
+        <div class="d-flex align-items-center">
+            <div style="width:16px; height:16px; background-color:#dc3545; border-radius:4px;" class="me-1"></div>
+            <small class="fw-semibold text-danger">Đã đặt</small>
+        </div>
+        <div class="d-flex align-items-center">
+            <div style="width:16px; height:16px; background-color:#ffc107; border-radius:4px;" class="me-1"></div>
+            <small class="fw-semibold text-dark">Đang chọn</small>
+        </div>
+    </div>
+</div>
+
+<!-- KHUNG CUỘN AN TOÀN -->
+<div class="map-scroll-container">
+    <div class="floor-plan-box shadow-sm position-relative">
+        
+        <!-- OVERLAY BẢN ĐỒ KHÓA -->
+        <div id="mapOverlay" class="map-overlay">
+            <div class="text-center bg-white p-4 rounded-4 shadow-lg border border-secondary mx-3" id="overlayContent" style="max-width: 420px;">
+                <i class="bi bi-map fs-1 mb-2 d-block text-secondary"></i>
+                <h5 class="fw-bold mb-2 text-dark">Bản đồ đang khóa</h5>
+                <span class="text-muted small">Vui lòng chọn <strong>Khu vực</strong>, <strong>Ngày Giờ</strong> và <strong>Số lượng</strong> ở cột bên trái để hiển thị bàn trống.</span>
+            </div>
+        </div>
+
+<!-- 1. KHU CỬA SỔ (HÀNG CÙNG) -->
+        <div class="area-group p-2 mb-3 border rounded bg-dark" style="border-color: #444 !important;">
+            <div class="text-center py-1 mb-2 rounded" style="background:#1a3c4b; border:1px solid #20556e;">
+                <i class="bi bi-cloud-sun-fill text-info me-2 fs-6"></i><strong class="text-light small">HƯỚNG NHÌN RA PHỐ (CỬA KÍNH)</strong>
+            </div>
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                <button type="button" class="map-table-btn" data-num="W-01" data-cap="2">W-01<br><small>2 chỗ</small></button>
+                <button type="button" class="map-table-btn" data-num="W-02" data-cap="2">W-02<br><small>2 chỗ</small></button>
+                <button type="button" class="map-table-btn" data-num="W-03" data-cap="4">W-03<br><small>4 chỗ</small></button>
+                <button type="button" class="map-table-btn" data-num="W-04" data-cap="4">W-04<br><small>4 chỗ</small></button>
+                <button type="button" class="map-table-btn table-8" data-num="W-05" data-cap="8">W-05<br><small>8 chỗ</small></button>
+            </div>
+        </div>
+
+        <!-- 2. HÀNG GIỮA -->
+        <div class="row g-2 mb-3 align-items-stretch">
+            
+            <!-- KHU TIÊU CHUẨN (2 bàn 8 trên cùng, 3 bàn 4 trái, 3 bàn 2 phải) -->
+            <div class="col-4">
+                <div class="area-group border rounded p-2 bg-dark h-100" style="border-color: #444 !important;">
+                    <div class="text-center fw-bold text-light mb-2 border-bottom border-secondary pb-1" style="font-size:0.78rem;">TIÊU CHUẨN</div>
+                    
+                    <!-- 2 bàn 8 trên cùng -->
+                    <div class="d-flex justify-content-center gap-2 mb-3">
+                        <button type="button" class="map-table-btn table-8" data-num="S-01" data-cap="8">S-01<br><small>8 chỗ</small></button>
+                        <button type="button" class="map-table-btn table-8" data-num="S-02" data-cap="8">S-02<br><small>8 chỗ</small></button>
+                    </div>
+
+                    <!-- 3 bàn 4 sát trái & 3 bàn 2 sát phải -->
+                    <div class="row g-2 px-1">
+                        <div class="col-6 d-flex flex-column align-items-start gap-2 border-end border-secondary pe-2">
+                            <button type="button" class="map-table-btn" data-num="S-03" data-cap="4">S-03<br><small>4 chỗ</small></button>
+                            <button type="button" class="map-table-btn" data-num="S-04" data-cap="4">S-04<br><small>4 chỗ</small></button>
+                            <button type="button" class="map-table-btn" data-num="S-05" data-cap="4">S-05<br><small>4 chỗ</small></button>
+                        </div>
+                        <div class="col-6 d-flex flex-column align-items-end gap-2 ps-2">
+                            <button type="button" class="map-table-btn" data-num="S-06" data-cap="2">S-06<br><small>2 chỗ</small></button>
+                            <button type="button" class="map-table-btn" data-num="S-07" data-cap="2">S-07<br><small>2 chỗ</small></button>
+                            <button type="button" class="map-table-btn" data-num="S-08" data-cap="2">S-08<br><small>2 chỗ</small></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Khu Buffet (Thêm bàn T-10) -->
+            <div class="col-4">
+                <div class="area-group border rounded p-2 bg-dark border-danger h-100">
+                    <div class="bg-danger text-white text-center py-1 px-1 rounded mb-2 fw-bold w-100 shadow-sm" style="font-size:0.78rem;">
+                        <i class="bi bi-cup-hot-fill me-1"></i>LINE BUFFET TRUNG TÂM
+                    </div>
+                    <div class="row g-1">
+                        <!-- Cột trái thêm T-10 -->
+                        <div class="col-4 d-flex flex-column align-items-center gap-2 border-end border-secondary px-0">
+                            <button type="button" class="map-table-btn" data-num="T-01" data-cap="4">T-01<br><small>4 chỗ</small></button>
+                            <button type="button" class="map-table-btn" data-num="T-02" data-cap="4">T-02<br><small>4 chỗ</small></button>
+                            <button type="button" class="map-table-btn" data-num="T-03" data-cap="4">T-03<br><small>4 chỗ</small></button>
+                            <button type="button" class="map-table-btn" data-num="T-10" data-cap="4">T-10<br><small>4 chỗ</small></button>
+                        </div>
+                        <div class="col-4 d-flex flex-column align-items-center gap-2 border-end border-secondary justify-content-center px-0">
+                            <button type="button" class="map-table-btn table-8" data-num="T-04" data-cap="8">T-04<br><small>8 chỗ</small></button>
+                            <button type="button" class="map-table-btn table-8" data-num="T-05" data-cap="8">T-05<br><small>8 chỗ</small></button>
+                        </div>
+                        <div class="col-4 d-flex flex-column align-items-center gap-2 px-0">
+                            <button type="button" class="map-table-btn" data-num="T-06" data-cap="2">T-06<br><small>2 chỗ</small></button>
+                            <button type="button" class="map-table-btn" data-num="T-07" data-cap="2">T-07<br><small>2 chỗ</small></button>
+                            <button type="button" class="map-table-btn" data-num="T-08" data-cap="2">T-08<br><small>2 chỗ</small></button>
+                            <button type="button" class="map-table-btn" data-num="T-09" data-cap="2">T-09<br><small>2 chỗ</small></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Khu VIP (Giữ nguyên) -->
+            <div class="col-4">
+                <div class="area-group border rounded p-2 bg-dark h-100" style="border-color: #ffc107 !important;">
+                    <div class="text-center fw-bold text-dark bg-warning py-1 rounded mb-2 shadow-sm" style="font-size:0.78rem;">
+                        <i class="bi bi-star-fill me-1"></i> KHU VỰC PHÒNG VIP
+                    </div>
+                    <div class="row g-2">
+                        <!-- PHÒNG VIP 1 -->
+                        <div class="col-12">
+                            <div class="border border-warning rounded p-2 bg-dark shadow-sm text-center">
+                                <span class="badge bg-warning text-dark mb-1" style="font-size:0.75rem;">PHÒNG VIP 1</span>
+                                <div class="border border-warning rounded py-1 px-2 mb-2 text-center shadow-sm" style="font-size:0.7rem; color: #ffc107;">
+                                    <i class="bi bi-cup-straw me-1 text-warning"></i>Quầy line riêng VIP 1
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <button type="button" class="map-table-btn table-16" data-num="VIP-01" data-cap="16">VIP-01<br><small>16 chỗ</small></button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- PHÒNG VIP 2 -->
+                        <div class="col-12">
+                            <div class="border border-warning rounded p-2 bg-dark shadow-sm text-center">
+                                <span class="badge bg-warning text-dark mb-1" style="font-size:0.75rem;">PHÒNG VIP 2</span>
+                                <div class="border border-warning rounded py-1 px-2 mb-2 text-center shadow-sm" style="font-size:0.7rem; color: #ffc107;">
+                                    <i class="bi bi-cup-straw me-1 text-warning"></i>Quầy line riêng VIP 2
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <button type="button" class="map-table-btn table-16" data-num="VIP-02" data-cap="16">VIP-02<br><small>16 chỗ</small></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div> <!-- End Row 2 -->
+
+        <!-- 3. LỐI RA VÀO / LỄ TÂN -->
+        <div class="reception-area pt-2 border-top">
+            <div class="row align-items-center justify-content-between g-2 text-center">
+                <div class="col-4">
+                    <div class="bg-dark text-white py-2 px-1 rounded shadow-sm border border-secondary">
+                        <i class="bi bi-display me-1 fs-6"></i><strong style="font-size:0.78rem;">QUẦY THU NGÂN</strong>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="bg-white p-1 rounded shadow-sm border" style="border-bottom: 5px solid #28a745 !important;">
+                        <strong class="text-success d-block" style="font-size:0.78rem;"><i class="bi bi-door-open-fill me-1"></i>CỬA RA VÀO</strong>
+                        <i class="bi bi-arrow-down-up text-success fw-bold small"></i>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="bg-white border rounded p-1.5 text-muted shadow-sm">
+                        <i class="bi bi-info-circle text-info me-1 fs-6"></i><span class="fw-semibold" style="font-size:0.75rem;">Khu vực ghế chờ</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- End floor-plan-box -->
+</div> <!-- End map-scroll-container -->

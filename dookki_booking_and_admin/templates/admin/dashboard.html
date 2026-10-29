@@ -1,0 +1,42 @@
+{% extends "admin/admin_base.html" %}
+{% block title %}Quản lý đặt bàn - Dookki Admin{% endblock %}
+{% block content %}
+<div class="container-fluid mt-3 mb-5 px-0">
+    <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h3 class="text-dark fw-bold mb-0">Danh sách đơn đặt bàn</h3>
+        <span class="badge bg-primary fs-6">Tổng đơn hôm nay: {{ today_order_count }}</span>
+    </div>
+    <div class="card shadow-sm mb-4 border-0"><div class="card-body">
+        <form method="GET" action="{{ url_for('admin.dashboard') }}" class="row g-2 align-items-center">
+            <div class="col-md-4 col-sm-8"><input type="text" name="q" class="form-control" placeholder="Nhập số điện thoại hoặc mã đơn..." value="{{ search_query or '' }}" aria-label="Tìm theo số điện thoại hoặc mã đơn"></div>
+            <div class="col-auto"><button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i>Tìm kiếm</button>
+                {% if search_query %}<a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Đặt lại</a>{% endif %}
+            </div>
+        </form>
+    </div></div>
+    <div class="table-responsive shadow-sm rounded bg-white p-3 border-0">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark"><tr><th>ID</th><th>Mã Đơn</th><th>Khách Hàng</th><th>SĐT</th><th>Thời Gian</th><th>Số Khách</th><th>Khu Vực</th><th>Mã Bàn</th><th>Ghi Chú</th><th>Trạng Thái</th><th>Thao Tác</th></tr></thead>
+            <tbody>
+            {% for booking in bookings %}
+                <tr>
+                    <td>#{{ booking.daily_order_number }}</td>
+                    <td>{% if booking.booking_code %}<span class="badge bg-warning text-dark">{{ booking.booking_code }}</span>{% else %}<span class="text-muted">-</span>{% endif %}</td>
+                    <td class="fw-bold">{{ booking.customer_name }}</td><td>{{ booking.phone }}</td>
+                    <td>{{ booking.booking_time }}<br><small class="text-muted">{{ booking.booking_date }}</small></td>
+                    <td>{{ booking.num_people }} người</td><td>{{ booking.area }}</td>
+                    <td>{% if booking.table_number %}<span class="badge bg-primary">{{ booking.table_number }}</span>{% else %}<span class="text-muted">Chưa xếp</span>{% endif %}</td>
+                    <td style="max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="{{ booking.note or '' }}">{{ booking.note if booking.note else '-' }}</td>
+                    <td><form action="{{ url_for('admin.update_status', id=booking.id) }}" method="POST" class="m-0"><select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                        {% for status in ['Đã xếp bàn', 'Đã đến', 'Đã hủy'] %}<option value="{{ status }}" {% if booking.status == status %}selected{% endif %}>{{ status }}</option>{% endfor %}
+                    </select></form></td>
+                    <td><form action="{{ url_for('admin.delete', id=booking.id) }}" method="POST" class="m-0" onsubmit="return confirm('Xóa đơn đặt bàn của {{ booking.customer_name }}?');"><button type="submit" class="btn btn-danger btn-sm">Xóa</button></form></td>
+                </tr>
+            {% else %}
+                <tr><td colspan="11" class="text-center text-muted py-4">{% if search_query %}Không tìm thấy đơn đặt bàn nào khớp với số điện thoại hoặc mã đơn <strong>"{{ search_query }}"</strong>.{% else %}Hệ thống chưa có đơn đặt bàn nào.{% endif %}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

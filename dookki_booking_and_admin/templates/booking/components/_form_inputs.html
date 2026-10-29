@@ -1,0 +1,73 @@
+<h5 class="border-bottom pb-2 mb-4 text-danger fw-bold"><i class="bi bi-ui-checks me-2"></i>Thông tin đặt bàn</h5>
+                            
+<div class="d-flex justify-content-end mb-3">
+    <button type="button" class="btn btn-outline-warning btn-sm fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#lookupModal">
+        <i class="bi bi-search me-1"></i> Tra cứu đặt bàn
+    </button>
+</div>
+
+<div class="alert alert-info py-2 px-3 mb-3" role="note">
+    <div class="fw-bold"><i class="bi bi-info-circle-fill me-1"></i>Hướng dẫn đặt bàn</div>
+    <ol class="small mb-0 mt-2 ps-3">
+        <li>Nhập họ tên và số điện thoại.</li>
+        <li>Chọn ngày, giờ đến và số lượng khách để xem bàn trống.</li>
+        <li>Chọn bàn màu xanh trên sơ đồ, nhấn <strong>ĐẶT BÀN NGAY</strong> rồi xác nhận.</li>
+        <li>Mỗi lượt giữ bàn 1 giờ 45 phút. Các lượt cùng bàn cần cách nhau ít nhất 1 giờ 45 phút (ví dụ lượt 13:30 thì lượt sau sớm nhất là 15:15).</li>
+        <li>Mỗi số điện thoại chỉ được đặt một bàn trong một ngày.</li>
+    </ol>
+</div>
+
+<div class="mb-3">
+    <label class="form-label fw-bold small text-secondary">Họ và tên <span class="text-danger">*</span></label>
+    <div class="input-group">
+        <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+        <input type="text" class="form-control" name="customer_name" autocomplete="off" required placeholder="Nhập họ tên">
+        <div class="invalid-feedback">Vui lòng nhập họ tên.</div>
+    </div>
+</div>
+
+<div class="mb-3">
+    <label class="form-label fw-bold small text-secondary">Số điện thoại <span class="text-danger">*</span></label>
+    <div class="input-group">
+        <span class="input-group-text bg-light"><i class="bi bi-telephone"></i></span>
+        <input type="tel" class="form-control" name="phone" id="phone" required placeholder="Ví dụ: 0912345678" pattern="^(0[3|5|7|8|9])+([0-9]{8})$">
+        <div class="invalid-feedback" id="phoneFeedback">SĐT không hợp lệ (Phải là số Việt Nam, 10 số).</div>
+    </div>
+</div>
+
+<!-- Ngày đến -->
+<div class="mb-3">
+    <label for="booking_date" class="form-label fw-bold">Ngày đến <span class="text-danger">*</span></label>
+    <div class="input-group">
+        <span class="input-group-text bg-dark text-danger border-secondary"><i class="bi bi-calendar-event"></i></span>
+        <input type="text" class="form-control bg-dark text-danger border-secondary fw-bold" id="booking_date" name="booking_date" required>
+    </div>
+</div>
+
+<!-- Giờ đến -->
+<div class="mb-3">
+    <label for="booking_time" class="form-label fw-bold">Giờ đến <span class="text-danger">*</span> <br><small class="text-muted fw-normal"><i>(Nhà hàng nhận bàn sớm nhất trước 45 phút.)</i></small></label>
+    <div class="input-group">
+        <span class="input-group-text bg-dark text-danger border-secondary"><i class="bi bi-clock"></i></span>
+        <input type="text" class="form-control bg-dark text-danger border-secondary fw-bold" id="booking_time" name="booking_time" required>
+    </div>
+    <div id="timeErrorMsg" class="text-danger small fw-bold mt-1 d-none"></div>
+</div>
+
+<!-- Số lượng khách -->
+<div class="mb-3">
+    <label for="num_people" class="form-label fw-bold">Số lượng khách <span class="text-danger">*</span></label>
+    <div class="input-group">
+        <span class="input-group-text bg-dark border-secondary text-light"><i class="bi bi-people"></i></span>
+        <input type="number" class="form-control bg-dark text-light border-secondary" id="num_people" name="num_people" min="1" max="50" required>
+    </div>
+</div>
+
+<!-- Ghi chú thêm -->
+<div class="mb-4">
+    <label for="note" class="form-label fw-bold">Ghi chú thêm</label>
+    <textarea class="form-control bg-dark text-light border-secondary" id="note" name="note" rows="2" placeholder="Ví dụ: Có trẻ em, sinh nhật..."></textarea>
+</div>
+
+<!-- Nút kích hoạt Modal (Nút duy nhất trên Form) -->
+<button type="submit" id="btnFakeSubmit" class="btn btn-danger w-100 fw-bold py-2 shadow-sm" disabled>ĐẶT BÀN NGAY</button>

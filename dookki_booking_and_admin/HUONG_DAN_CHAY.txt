@@ -1,0 +1,17 @@
+HƯỚNG DẪN CHẠY DOOKKI BOOKING
+
+1. Giải nén ZIP vào một thư mục.
+2. Mở thư mục dookki_booking vừa giải nén.
+3. Mở PowerShell hoặc Command Prompt tại thư mục này.
+4. Chạy lệnh: python run.py
+5. Dùng các đường dẫn được in trong cửa sổ vừa mở.
+
+Trang khách hàng: http://127.0.0.1:5000/booking
+Trang đăng nhập:  http://127.0.0.1:5000/auth/login
+Trang quản trị:   http://127.0.0.1:5000/admin/dashboard
+
+Trang quản trị yêu cầu đăng nhập bằng tài khoản admin.
+Nếu cửa sổ chạy ứng dụng cũ vẫn đang mở, nhấn Ctrl+C để dừng trước khi chạy lại.
+
+Có thể chạy bằng Flask CLI từ thư mục dookki_booking:
+python -m flask --app run run --host 0.0.0.0 --port 5000

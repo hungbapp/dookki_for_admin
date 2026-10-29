@@ -1,0 +1,153 @@
+:root {
+    --dookki-red: #D32F2F;
+    --dookki-yellow: #FFC107;
+    --bg-color: #f8f9fa;
+    --card-bg: #ffffff;
+    --text-primary: #333333;
+    --text-secondary: #6c757d;
+    --border-color: #dee2e6;
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: var(--text-primary);
+}
+
+.navbar-dookki {
+    background-color: var(--dookki-red);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-dookki {
+    background-color: var(--dookki-red);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-dookki:hover {
+    background-color: #b71c1c;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.btn-dookki:disabled {
+    background-color: #e57373;
+    transform: none;
+    box-shadow: none;
+}
+
+.card {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.card-header-dookki {
+    background-color: var(--dookki-yellow);
+    font-weight: bold;
+    color: #333;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: none;
+}
+
+/* Sơ đồ chọn bàn */
+.restaurant-layout {
+    background-color: #fff;
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.layout-section {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #fafafa;
+}
+
+.layout-section-title {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+.table-box {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.table-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+}
+
+.table-box.btn-outline-secondary {
+    background-color: #fff;
+    border-color: #ced4da;
+    color: #495057;
+}
+
+.table-box.btn-outline-secondary::before {
+    background-color: #28a745; /* Trống - Xanh lá */
+}
+
+.table-box.btn-outline-secondary:hover {
+    background-color: #e9ecef;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.table-box.btn-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+    cursor: not-allowed;
+}
+
+.table-box.btn-danger::before {
+    background-color: #dc3545; /* Đã đặt - Đỏ */
+}
+
+.table-box.btn-warning {
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+    color: #856404;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+}
+
+.table-box.btn-warning::before {
+    background-color: #ffc107; /* Đang chọn - Vàng */
+}
+
+/* Custom form elements */
+.form-control:focus, .form-select:focus {
+    border-color: var(--dookki-yellow);
+    box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+}
+
+.form-label {
+    color: #495057;
+}
