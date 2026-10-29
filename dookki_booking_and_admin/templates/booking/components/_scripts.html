@@ -1,0 +1,439 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // --- 1. HÀM CẬP NHẬT GIỜ MỜ THEO THỜI GIAN THỰC TẾ ---
+    function updateDynamicMinTime(timePickerInstance) {
+        const dateInput = document.getElementById('booking_date').value;
+        const today = new Date();
+        const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
+        if (dateInput && dateInput !== todayStr) {
+            timePickerInstance.set('minTime', "10:00");
+        } else {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + 45);
+
+            let hours = now.getHours();
+            let minutes = Math.ceil(now.getMinutes() / 15) * 15;
+
+            if (minutes === 60) {
+                hours += 1;
+                minutes = 0;
+            }
+
+            if (hours < 10) {
+                timePickerInstance.set('minTime', "10:00");
+            } else if (hours > 21 || (hours === 21 && minutes > 0)) {
+                // Nếu hiện tại đã quá 21h (đã hết giờ nhận khách hôm nay)
+                timePickerInstance.clear(); // Xóa rỗng ô thời gian
+            } else {
+                let hStr = String(hours).padStart(2, '0');
+                let mStr = String(minutes).padStart(2, '0');
+                timePickerInstance.set('minTime', `${hStr}:${mStr}`);
+            }
+        }
+    }
+
+    // --- 2. KHỞI TẠO KHUNG CHỌN GIỜ ---
+    const timePicker = flatpickr("#booking_time", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+        maxTime: "21:00",
+        minuteIncrement: 15,
+        allowInput: false,
+        onOpen: function(selectedDates, dateStr, instance) {
+            updateDynamicMinTime(instance);
+        },
+        onChange: function() {
+            validateTime();
+            fetchTables();
+        }
+    });
+
+    // --- 3. KHỞI TẠO KHUNG CHỌN NGÀY ---
+    flatpickr("#booking_date", {
+        locale: "vn",
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        defaultDate: "today",
+        allowInput: false,
+        onChange: function(selectedDates, dateStr) {
+            updateDynamicMinTime(timePicker);
+            validateTime();
+            fetchTables();
+        }
+    });
+
+    const form = document.getElementById('bookingForm');
+    const timeInput = document.getElementById('booking_time');
+    const dateInput = document.getElementById('booking_date');
+    const peopleInput = document.getElementById('num_people');
+    const selectedTableInput = document.getElementById('selectedTableId');
+    const btnFakeSubmit = document.getElementById('btnFakeSubmit');
+    const btnFinalSubmit = document.getElementById('btnFinalSubmit');
+    const overlay = document.getElementById('mapOverlay');
+    const overlayContent = document.getElementById('overlayContent');
+    const timeErrorMsg = document.getElementById('timeErrorMsg');
+    
+    let timerInterval = null;
+
+    function formatMMSS(seconds) {
+        if (seconds <= 0) return "00:00";
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function startLiveTimers() {
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            document.querySelectorAll('.map-table-btn[data-timer]').forEach(btn => {
+                let currentSec = parseInt(btn.dataset.timer, 10);
+                if (currentSec > 0) {
+                    currentSec--;
+                    btn.dataset.timer = currentSec;
+                    const timerDisplay = btn.querySelector('.timer-text');
+                    if (timerDisplay) {
+                        timerDisplay.innerText = formatMMSS(currentSec);
+                    }
+                } else {
+                    fetchTables();
+                }
+            });
+        }, 1000);
+    }
+
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function() {
+            const regex = /^(0[35789])[0-9]{8}$/;
+            if(!regex.test(this.value)) {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+                this.setCustomValidity("SĐT không hợp lệ");
+            } else {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+                this.setCustomValidity("");
+            }
+        });
+    }
+
+    // --- 4. HÀM KIỂM TRA THỜI GIAN VÀ KHÓA NÚT SUBMIT ---
+    function validateTime() {
+        const timeVal = timeInput.value;
+        const dateVal = dateInput.value;
+        
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${year}-${month}-${day}`;
+
+        // 4.1 Kiểm tra nếu đặt cho HÔM NAY nhưng hiện tại đã quá trễ
+        if (dateVal === todayStr) {
+            const minAllowedMinutes = today.getHours() * 60 + today.getMinutes() + 45;
+            if (minAllowedMinutes > 21 * 60) { // Quá 21:00
+                timeInput.classList.add('is-invalid');
+                if (timeErrorMsg) {
+                    timeErrorMsg.innerText = "Đã hết thời gian đặt bàn cho hôm nay. Vui lòng chọn ngày mai!";
+                    timeErrorMsg.classList.remove('d-none');
+                }
+                if (btnFakeSubmit) btnFakeSubmit.disabled = true; // KHÓA MỜ NÚT
+                return false;
+            }
+        }
+
+        if (!timeVal) return true; // Nếu rỗng để HTML Required tự báo
+        
+        const pts = timeVal.split(':');
+        const h = parseInt(pts[0], 10), m = parseInt(pts[1], 10);
+        
+        // 4.2 Kiểm tra khung giờ hoạt động (Ngoài 10h - 21h)
+        if (h < 10 || h > 21 || (h === 21 && m > 0)) {
+            timeInput.classList.add('is-invalid');
+            if (timeErrorMsg) {
+                timeErrorMsg.innerText = "Nhà hàng hoạt động từ 10h sáng đến 21h tối";
+                timeErrorMsg.classList.remove('d-none');
+            }
+            if (btnFakeSubmit) btnFakeSubmit.disabled = true; // KHÓA MỜ NÚT
+            return false;
+        }
+
+        // 4.3 Kiểm tra đặt giờ trong quá khứ (Cho HÔM NAY)
+        if (dateVal === todayStr) {
+            const minAllowedMinutes = today.getHours() * 60 + today.getMinutes() + 45;
+            const selectedMinutes = h * 60 + m;
+
+            if (selectedMinutes < minAllowedMinutes) {
+                timeInput.classList.add('is-invalid');
+                if (timeErrorMsg) {
+                    timeErrorMsg.innerText = "Thời gian không hợp lệ! (Phải cách hiện tại ít nhất 45 phút)";
+                    timeErrorMsg.classList.remove('d-none');
+                }
+                if (btnFakeSubmit) btnFakeSubmit.disabled = true; // KHÓA MỜ NÚT
+                return false;
+            }
+        }
+
+        // Hợp lệ -> Tắt báo lỗi
+        timeInput.classList.remove('is-invalid');
+        if (timeErrorMsg) timeErrorMsg.classList.add('d-none');
+        
+        // Nếu đã chọn Bàn rồi thì mở lại nút Submit
+        if (selectedTableInput.value && btnFakeSubmit) {
+            btnFakeSubmit.disabled = false;
+        }
+        return true;
+    }
+
+    function resetMap() {
+        document.querySelectorAll('.map-table-btn').forEach(btn => {
+            if(btn.dataset.num) {
+                btn.className = `map-table-btn ${btn.dataset.cap == 8 ? 'table-8' : ''} ${btn.dataset.cap == 16 ? 'table-16' : ''}`;
+                btn.innerHTML = `${btn.dataset.num}<br><small>${btn.dataset.cap} chỗ</small>`;
+                btn.onclick = null;
+                btn.removeAttribute('data-timer');
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+            }
+        });
+    }
+
+    function fetchTables() {
+        const date = dateInput.value;
+        const time = timeInput.value;
+        const people = parseInt(peopleInput.value) || 0;
+
+        if (!date || !time) {
+            if (overlay && overlayContent) {
+                overlay.classList.remove('d-none');
+                overlayContent.innerHTML = `
+                    <i class="bi bi-map fs-1 mb-2 d-block text-secondary"></i>
+                    <h5 class="fw-bold mb-2 text-dark">Bản đồ đang khóa</h5>
+                    <span class="text-muted small">Vui lòng chọn <strong>Ngày đến</strong> và <strong>Giờ đến</strong> để xem sơ đồ.</span>
+                `;
+            }
+            resetMap();
+            return;
+        }
+
+        if (overlay) overlay.classList.add('d-none');
+
+        fetch(`/api/get-tables?date=${date}&time=${time}`)
+            .then(res => res.json())
+            .then(data => {
+                selectedTableInput.value = '';
+                if(btnFakeSubmit) btnFakeSubmit.disabled = true; // Chờ khách click chọn bàn mới mở
+                resetMap(); 
+
+                data.forEach(tableInfo => {
+                    const btn = document.querySelector(`.map-table-btn[data-num="${tableInfo.table_number}"]`);
+                    if (btn) {
+                        if (people > 0 && tableInfo.capacity < people) {
+                            btn.style.opacity = '0.3';
+                            btn.style.pointerEvents = 'none';
+                            btn.innerHTML = `${tableInfo.table_number}<br><small class="text-danger">Không đủ chỗ</small>`;
+                            return; 
+                        }
+
+                        if (tableInfo.status === 'booked') {
+                            btn.classList.add('status-booked');
+                            btn.innerHTML = `${tableInfo.table_number}<br><small><i class="bi bi-lock-fill"></i> ${tableInfo.booking_time}</small>`;
+                            btn.onclick = () => alert(`⚠️ Bàn ${tableInfo.table_number} đã được đặt lúc ${tableInfo.booking_time}`);
+                        } else if (tableInfo.status === 'waiting') {
+                            btn.classList.add('status-waiting');
+                            btn.dataset.timer = tableInfo.remaining_seconds;
+                            btn.innerHTML = `${tableInfo.table_number}<br><small class="fw-bold timer-text"><i class="bi bi-hourglass-split"></i></small>`;
+                        } else if (tableInfo.status === 'dining') {
+                            btn.classList.add('status-dining');
+                            btn.dataset.timer = tableInfo.remaining_seconds;
+                            btn.innerHTML = `${tableInfo.table_number}<br><small class="fw-bold timer-text"><i class="bi bi-cup-hot"></i></small>`;
+                        } else if (tableInfo.status === 'available') {
+                            btn.classList.add('status-available');
+                            
+                            // KHÁCH CLICK CHỌN BÀN
+                            btn.onclick = function() {
+                                document.querySelectorAll('.map-table-btn').forEach(b => b.classList.remove('status-selected'));
+                                btn.classList.add('status-selected');
+                                selectedTableInput.value = tableInfo.id;
+                                
+                                // Nếu thời gian hợp lệ thì MỞ NÚT ĐẶT BÀN, nếu sai giữ nguyên khóa
+                                if(validateTime() && btnFakeSubmit) {
+                                    btnFakeSubmit.disabled = false;
+                                }
+                            };
+                        }
+                    }
+                });
+                startLiveTimers();
+            })
+            .catch(err => console.error("Lỗi tải bàn:", err));
+    }
+
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        let isValid = true;
+        if (!form.checkValidity()) isValid = false;
+        if (!validateTime()) isValid = false;
+        if (!selectedTableInput.value) {
+            isValid = false;
+            if(form.checkValidity() && validateTime()) alert("Vui lòng click chọn một bàn màu Xanh lá trên bản đồ!");
+        }
+
+        if (isValid) {
+            document.getElementById('modName').innerText = form.customer_name.value;
+            document.getElementById('modPhone').innerText = form.phone.value;
+            document.getElementById('modDateTime').innerText = timeInput.value + ' | ' + dateInput.value;
+            document.getElementById('modPeople').innerText = peopleInput.value + ' người';
+            
+            const selectedBtn = document.querySelector('.map-table-btn.status-selected');
+            const tNum = selectedBtn ? selectedBtn.dataset.num : '';
+            document.getElementById('modArea').innerText = 'Bàn ' + tNum;
+            
+            var confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            confirmModal.show();
+        } else {
+            form.classList.add('was-validated');
+        }
+    }, false);
+    
+   if (btnFinalSubmit) {
+        btnFinalSubmit.addEventListener('click', function() {
+            // Đổi nút thành trạng thái Đang tải...
+            btnFinalSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý...';
+            btnFinalSubmit.disabled = true;
+
+            const formData = new FormData(form);
+
+            // Gửi dữ liệu ngầm bằng fetch (AJAX)
+            fetch('/book', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                btnFinalSubmit.innerHTML = 'Xác nhận đặt bàn';
+                btnFinalSubmit.disabled = false;
+                var confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
+                confirmModal.hide();
+
+                if(data.success) {
+                    // 1. Tạo Link URL cho QR Code (Ví dụ: http://127.0.0.1:5000/?lookup=123456)
+                    const currentUrl = window.location.origin;
+                    const lookupUrl = `${currentUrl}/?lookup=${data.code}`;
+                    const qrImageSrc = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(lookupUrl)}`;
+
+                    // 2. Gán dữ liệu vào Modal Thành Công
+                    document.getElementById('successCode').innerText = data.code;
+                    document.getElementById('successQR').src = qrImageSrc;
+                    
+                    // 3. Lưu vào LocalStorage để nhớ khi F5
+                    localStorage.setItem('recentBookingCode', data.code);
+                    localStorage.setItem('recentBookingQR', qrImageSrc);
+
+                    var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                    successModal.show();
+                } else {
+                    alert("⚠️ TỪ CHỐI ĐẶT BÀN:\n" + data.message);
+                }
+            })
+            .catch(err => console.error(err));
+        });
+    }
+
+    // Lệnh xử lý cho Nút Tìm Kiếm Lịch Sử
+    const btnLookup = document.getElementById('btnLookup');
+    if (btnLookup) {
+        btnLookup.addEventListener('click', function() {
+            const query = document.getElementById('lookupInput').value;
+            const resDiv = document.getElementById('lookupResult');
+            
+            if(!query) return alert("Vui lòng nhập thông tin!");
+            
+            btnLookup.innerHTML = 'Đang tìm...';
+            
+            fetch(`/api/lookup?query=${query}`)
+            .then(res => res.json())
+            .then(data => {
+                btnLookup.innerHTML = 'Tìm kiếm';
+                resDiv.classList.remove('d-none');
+                if (data.success) {
+                    const currentUrl = window.location.origin;
+                    const lookupUrl = `${currentUrl}/?lookup=${data.data.code}`;
+                    const qrImageSrc = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(lookupUrl)}`;
+
+                    resDiv.innerHTML = `
+                        <h5 class="text-success fw-bold mb-3"><i class="bi bi-check-circle me-1"></i>ĐÃ TÌM THẤY ĐƠN ĐẶT BÀN</h5>
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <ul class="list-unstyled mb-0 fs-5" style="line-height: 2.2;">
+                                    <li><span class="text-muted">Mã code:</span> <strong class="text-warning">${data.data.code}</strong></li>
+                                    <li><span class="text-muted">Khách hàng:</span> <strong class="text-light">${data.data.name}</strong></li>
+                                    <li><span class="text-muted">Bàn / Khu vực:</span> <strong class="text-info">${data.data.table}</strong></li>
+                                    <li><span class="text-muted">Thời gian:</span> <strong class="text-light">${data.data.time} | ${data.data.date}</strong></li>
+                                    <li><span class="text-muted">Trạng thái:</span> <span class="badge bg-secondary fs-6">${data.data.status}</span></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4 text-center mt-3 mt-md-0">
+                                <div class="bg-white p-2 rounded d-inline-block shadow">
+                                    <img src="${qrImageSrc}" alt="QR Code" style="width: 140px; height: 140px;">
+                                </div>
+                                <div class="text-muted small mt-1">Quét để xem đơn</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resDiv.innerHTML = `<span class="text-danger fw-bold fs-5"><i class="bi bi-x-circle me-1"></i>${data.message}</span>`;
+                }
+            });
+        });
+    }
+
+    if (peopleInput) peopleInput.addEventListener('input', fetchTables);
+    
+    updateDynamicMinTime(timePicker);
+    validateTime();
+    fetchTables();
+});
+
+// --- HÀM TỰ ĐỘNG BẬT TÌM KIẾM ---
+    window.autoLookup = function(code) {
+        document.getElementById('lookupInput').value = code;
+        var lookupModal = new bootstrap.Modal(document.getElementById('lookupModal'));
+        lookupModal.show();
+        // Giả lập click nút tìm kiếm sau khi modal mở
+        setTimeout(() => {
+            document.getElementById('btnLookup').click();
+        }, 300);
+    };
+
+    // --- KIỂM TRA LÚC LOAD TRANG ---
+    // 1. Nếu quét QR bằng điện thoại (trên thanh URL có ?lookup=123456)
+    const urlParams = new URLSearchParams(window.location.search);
+    const lookupParam = urlParams.get('lookup');
+    if (lookupParam) {
+        autoLookup(lookupParam);
+        // Xóa param trên URL cho đẹp
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } 
+    // 2. Nếu khách vừa đặt bàn xong và vô tình load lại trang (F5)
+    else {
+        const savedCode = localStorage.getItem('recentBookingCode');
+        const savedQR = localStorage.getItem('recentBookingQR');
+        if (savedCode && savedQR) {
+            // Hiện Widget ở góc
+            document.getElementById('widgetCode').innerText = savedCode;
+            document.getElementById('widgetQR').src = savedQR;
+            document.getElementById('recentBookingWidget').classList.remove('d-none');
+        }
+    }
+</script>

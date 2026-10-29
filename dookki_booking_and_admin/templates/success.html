@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Đặt bàn thành công - Dookki{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header text-white text-center fs-4 fw-bold py-3" style="background-color: #28a745;">
+                <i class="bi bi-check-circle-fill me-2"></i>ĐẶT BÀN THÀNH CÔNG!
+            </div>
+            <div class="card-body p-4 p-md-5">
+                
+                <div class="alert alert-warning border-warning shadow-sm text-center mb-4">
+                    <h5 class="fw-bold text-danger mb-2"><i class="bi bi-telephone-inbound-fill me-2"></i>CHÚ Ý QUAN TRỌNG</h5>
+                    <strong class="text-dark fs-6 text-uppercase">Nhân viên sẽ gọi cho khách hàng khi đã xác nhận bàn trên hệ thống, vui lòng kiểm tra kỹ thông tin sau:</strong>
+                </div>
+                
+                <ul class="list-group list-group-flush mb-4 border rounded shadow-sm">
+                    <li class="list-group-item d-flex justify-content-between p-3">
+                        <span class="fw-semibold text-secondary">Mã đơn:</span> <span class="fw-bold">#{{ booking.id }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between p-3 bg-light">
+                        <span class="fw-semibold text-secondary">Khách hàng:</span> <span class="fw-bold text-danger">{{ booking.customer_name }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between p-3">
+                        <span class="fw-semibold text-secondary">Số điện thoại:</span> <span class="fw-bold fs-5">{{ booking.phone }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between p-3 bg-light">
+                        <span class="fw-semibold text-secondary">Thời gian:</span> <span class="fw-bold text-primary">{{ booking.booking_time }} | {{ booking.booking_date }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between p-3">
+                        <span class="fw-semibold text-secondary">Số khách:</span> <span class="fw-bold">{{ booking.num_people }} người</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between p-3 bg-light">
+                        <span class="fw-semibold text-secondary">Khu vực:</span> <span class="fw-bold">{{ booking.area }} (Bàn {{ booking.table_number }})</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between p-3">
+                        <span class="fw-semibold text-secondary">Trạng thái:</span> <span class="badge bg-warning text-dark fs-6 rounded-pill px-3">{{ booking.status }}</span>
+                    </li>
+                </ul>
+
+                <div class="d-grid mt-4">
+                    <a href="{{ url_for('customer.booking_form') }}" class="btn btn-outline-danger btn-lg fw-bold rounded-3">Quay lại trang đặt bàn</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

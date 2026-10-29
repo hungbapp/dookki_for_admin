@@ -1,0 +1,125 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/airbnb.css">
+
+<style>
+    /* KHUNG BẢN ĐỒ CHỦ ĐẠO */
+    .floor-plan-box {
+        position: relative !important;
+        background-color: #f8f9fa;
+        border: 2px solid #dee2e6;
+        border-radius: 12px;
+        padding: 1rem;
+        min-width: 680px;
+    }
+
+    .map-scroll-container {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: visible;
+    }
+
+    /* OVERLAY LỚP PHỦ KHÓA BẢN ĐỒ */
+    .map-overlay {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background-color: rgba(255, 255, 255, 0.92) !important;
+        z-index: 1000 !important;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+        border-radius: 10px;
+    }
+
+    .map-overlay.d-none {
+        display: none !important;
+    }
+
+    .area-group {
+        transition: all 0.25s ease;
+        border-radius: 10px;
+        position: relative;
+    }
+    .area-group.dimmed { opacity: 0.25; pointer-events: none; filter: grayscale(100%); }
+    .area-group.active-area {
+        box-shadow: 0 0 12px rgba(211, 47, 47, 0.35);
+        border-color: #D32F2F !important;
+        background-color: #fff !important;
+        z-index: 10;
+    }
+
+    /* NÚT BÀN GHI ĐỊNH DẠNG */
+    .map-table-btn {
+        width: 48px;
+        height: 48px;
+        border: 2px dashed #ced4da;
+        background-color: #fff;
+        color: #6c757d;
+        border-radius: 8px;
+        padding: 2px;
+        pointer-events: none;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        line-height: 1.1;
+        font-weight: bold;
+        font-size: 0.75rem;
+        box-sizing: border-box;
+    }
+    .map-table-btn.table-8 { width: 78px; }
+    .map-table-btn.table-16 { width: 115px; height: 55px; }
+
+    /* MÀU TRẠNG THÁI BÀN */
+    .map-table-btn.status-available {
+        border: 2px solid #28a745;
+        background-color: #e8f5e9;
+        color: #28a745;
+        pointer-events: auto;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(40,167,69,0.15);
+    }
+    .map-table-btn.status-available:hover {
+        background-color: #28a745; color: white; transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(40,167,69,0.25);
+    }
+    .map-table-btn.status-booked {
+        border: 2px solid #dc3545; background-color: #f8d7da; color: #dc3545;
+        pointer-events: auto; cursor: not-allowed;
+    }
+    .map-table-btn.status-selected {
+        border: 2px solid #ffc107 !important;
+        background-color: #ffc107 !important;
+        color: #000 !important;
+        pointer-events: auto;
+        transform: scale(1.06);
+        z-index: 15;
+        box-shadow: 0 3px 10px rgba(255,193,7,0.5);
+    }
+    .map-table-btn.status-waiting {
+        border: 2px solid #fd7e14 !important;
+        background-color: #ffe8cc !important;
+        color: #d9480f !important;
+        pointer-events: auto;
+        cursor: pointer;
+    }
+    .map-table-btn.status-dining {
+        border: 2px solid #6f42c1 !important;
+        background-color: #f3e8ff !important;
+        color: #520dc2 !important;
+        pointer-events: auto;
+        cursor: not-allowed;
+    }
+
+    .flatpickr-input { background-color: #fff !important; cursor: pointer !important; font-weight: bold; color: #D32F2F; }
+    .timepicker-icon { color: #D32F2F; }
+
+    @media (min-width: 992px) { .form-col { border-right: 1px solid #dee2e6; padding-right: 1.5rem; } }
+    @media (max-width: 991px) { .form-col { border-bottom: 1px solid #dee2e6; padding-bottom: 2rem; margin-bottom: 2rem; } }
+</style>

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% include 'booking/components/_styles.html' %}
+
+<div class="container my-4">
+    <form action="{{ url_for('customer.book_table') }}" method="POST" id="bookingForm" class="needs-validation" autocomplete="off" novalidate>
+        <input type="hidden" name="table_id" id="selectedTableId" value="">
+        
+        <div class="row">
+            <!-- Cột trái: Form nhập thông tin (Nút Tra cứu đã nằm gọn trong này) -->
+            <div class="col-lg-4 form-col">
+                {% include 'booking/components/_form_inputs.html' %}
+            </div>
+
+            <!-- Cột phải: Sơ đồ nhà hàng -->
+            <div class="col-lg-8">
+                {% include 'booking/components/_map_layout.html' %}
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- ========================================== -->
+<!-- CÁC BẢNG THÔNG BÁO (MODAL & WIDGET) ẨN -->
+<!-- ========================================== -->
+
+<!-- 1. Modal Xác Nhận Đặt Bàn -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-light border-secondary">
+            <div class="modal-header bg-danger text-white border-0">
+                <h5 class="modal-title fw-bold"><i class="bi bi-check-circle-fill me-2"></i>Xác nhận thông tin đặt bàn</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Vui lòng kiểm tra lại thông tin trước khi gửi:</p>
+                <ul class="list-group list-group-flush border border-secondary rounded mb-3">
+                    <li class="list-group-item bg-dark text-light border-secondary"><strong>Khách hàng:</strong> <span id="modName"></span></li>
+                    <li class="list-group-item bg-dark text-light border-secondary"><strong>Số điện thoại:</strong> <span id="modPhone"></span></li>
+                    <li class="list-group-item bg-dark text-light border-secondary"><strong>Thời gian:</strong> <span id="modDateTime"></span></li>
+                    <li class="list-group-item bg-dark text-light border-secondary"><strong>Số lượng:</strong> <span id="modPeople"></span></li>
+                    <li class="list-group-item bg-dark text-light border-secondary"><strong>Khu vực:</strong> <span id="modArea" class="text-info fw-bold"></span></li>
+                </ul>
+                <div class="alert alert-warning small mb-0 text-dark">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    <strong>Lưu ý:</strong> Quán sẽ giữ bàn tối đa 15 phút. Vui lòng đến đúng giờ!
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy, sửa lại</button>
+                <button type="button" class="btn btn-danger fw-bold" id="btnFinalSubmit">Xác nhận đặt bàn</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Modal Báo Thành Công + Mã QR -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center border-success bg-dark text-light">
+            <div class="modal-body p-4">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+                <h4 class="fw-bold mt-2 text-success">ĐẶT BÀN THÀNH CÔNG!</h4>
+                <p class="text-muted mb-3">Bạn có thể dùng mã này hoặc SĐT để check-in</p>
+                
+                <div class="bg-black border border-secondary rounded p-3 mb-3">
+                    <div class="fw-bold text-light mb-2">MÃ ĐẶT BÀN CỦA BẠN</div>
+                    <h1 class="text-warning fw-bolder tracking-wide" id="successCode">------</h1>
+                </div>
+                
+                <!-- Hình ảnh QR Code sinh tự động -->
+                <div class="mb-3">
+                    <img id="successQR" src="" alt="QR Code" class="border p-2 rounded bg-white shadow-sm" style="width: 150px; height: 150px;">
+                </div>
+                
+                <button type="button" class="btn btn-success px-5 fw-bold" data-bs-dismiss="modal" onclick="location.reload();">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Widget Nổi Giữ Lịch Sử (Đã làm to giao diện và phóng to QR) -->
+<div id="recentBookingWidget" class="d-none position-fixed bottom-0 end-0 p-3" style="z-index: 1050;">
+    <div class="card bg-dark border-warning shadow-lg" style="width: 240px;">
+        <div class="card-header bg-warning text-dark fw-bold d-flex justify-content-between align-items-center py-2 px-3">
+            <span style="font-size: 0.9rem;"><i class="bi bi-ticket-perforated"></i> BÀN VỪA ĐẶT</span>
+            <button type="button" class="btn-close btn-close-dark" style="font-size: 0.6rem;" onclick="document.getElementById('recentBookingWidget').classList.add('d-none');"></button>
+        </div>
+        <div class="card-body text-center p-3">
+            <h4 class="text-danger fw-bolder mb-2 tracking-wide" id="widgetCode">------</h4>
+            <img id="widgetQR" src="" style="width: 140px; height: 140px;" class="bg-white p-1 rounded shadow-sm mb-2">
+            <div>
+                <button class="btn btn-sm btn-outline-light w-100 fw-bold py-2" style="font-size: 0.85rem;" onclick="autoLookup(document.getElementById('widgetCode').innerText)">
+                    <i class="bi bi-search"></i> Xem chi tiết
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4. Modal Tra Cứu Lịch Sử (Đã làm to bảng và thêm QR code bên cạnh) -->
+<div class="modal fade" id="lookupModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-dark border-secondary text-light p-2">
+            <div class="modal-header border-secondary">
+                <h4 class="modal-title fw-bold text-warning"><i class="bi bi-search me-2"></i>Tra cứu thông tin đặt bàn</h4>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="input-group input-group-lg mb-4">
+                    <input type="text" id="lookupInput" class="form-control bg-dark text-light border-secondary fs-5" placeholder="Nhập Số điện thoại hoặc Mã 6 số...">
+                    <button class="btn btn-warning fw-bold px-4 fs-5" type="button" id="btnLookup">Tìm kiếm</button>
+                </div>
+                <div id="lookupResult" class="d-none mt-3 p-4 border border-secondary rounded bg-black">
+                    <!-- Kết quả hiển thị kèm QR code bên cạnh -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% include 'booking/components/_scripts.html' %}
+{% endblock %}

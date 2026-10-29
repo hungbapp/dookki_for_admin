@@ -1,0 +1,61 @@
+{% extends "admin/admin_base.html" %}
+{% block title %}Quản lý tài khoản - Dookki Admin{% endblock %}
+{% block content %}
+<div class="container-fluid px-0 py-2">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">Quản lý tài khoản</h3>
+            <p class="text-muted mb-0">Xem tài khoản đã đăng ký và cấp quyền truy cập hệ thống.</p>
+        </div>
+        <span class="badge bg-dark fs-6">{{ users|length }} tài khoản{% if search_text %} khớp tìm kiếm{% endif %}</span>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('admin.accounts') }}" class="row g-2 align-items-center">
+                <div class="col-md-5 col-sm-8">
+                    <input class="form-control" type="search" name="q" value="{{ search_text or '' }}" placeholder="Tìm theo tên đăng nhập hoặc họ tên" aria-label="Tìm tài khoản">
+                </div>
+                <div class="col-auto"><button class="btn btn-primary" type="submit"><i class="bi bi-search me-1"></i>Tìm kiếm</button>
+                    {% if search_text %}<a class="btn btn-outline-secondary" href="{{ url_for('admin.accounts') }}">Đặt lại</a>{% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-responsive bg-white rounded shadow-sm p-3">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr><th>ID</th><th>Họ và tên</th><th>Tên đăng nhập</th><th>Ngày tạo</th><th>Vai trò hiện tại</th><th>Cấp quyền</th></tr>
+            </thead>
+            <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>#{{ user.id }}</td>
+                    <td class="fw-semibold">{{ user.full_name }}</td>
+                    <td>{{ user.username }}{% if user.id == session.get('user_id') %} <span class="badge bg-secondary">Bạn</span>{% endif %}</td>
+                    <td>{{ user.created_at or '-' }}</td>
+                    <td>{% if user.role == 'admin' %}<span class="badge bg-danger">Quản trị viên</span>{% else %}<span class="badge bg-primary">Khách hàng</span>{% endif %}</td>
+                    <td>
+                    {% if user.id == session.get('user_id') %}
+                        <span class="text-muted small">Không thể tự đổi quyền</span>
+                    {% else %}
+                        <form method="POST" action="{{ url_for('admin.update_account_role', user_id=user.id, q=search_text) }}" class="d-flex flex-wrap gap-2 align-items-center">
+                            <select name="role" class="form-select form-select-sm" style="max-width:190px" aria-label="Vai trò mới của {{ user.username }}">
+                                <option value="customer" {% if user.role == 'customer' %}selected{% endif %}>Khách hàng</option>
+                                <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Quản trị viên</option>
+                            </select>
+                            <button class="btn btn-sm btn-outline-danger" type="submit" onclick="return confirm('Xác nhận cập nhật quyền cho tài khoản {{ user.username }}?')">Lưu quyền</button>
+                        </form>
+                    {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-4">{% if search_text %}Không tìm thấy tài khoản phù hợp.{% else %}Chưa có tài khoản nào được đăng ký.{% endif %}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="alert alert-info mt-4 mb-0"><i class="bi bi-info-circle me-1"></i>Tài khoản đăng ký mới mặc định có quyền Khách hàng. Chỉ cấp quyền Quản trị viên cho người được phép quản lý hệ thống.</div>
+</div>
+{% endblock %}
